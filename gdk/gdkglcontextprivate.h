@@ -53,6 +53,8 @@ struct _GdkGLContext
 
   /* We store the old drawn areas to support buffer-age optimizations */
   cairo_region_t *old_updated_area[2];
+
+  guint default_framebuffer;
 };
 
 struct _GdkGLContextClass
