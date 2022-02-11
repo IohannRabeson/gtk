@@ -199,6 +199,7 @@ gsk_gl_renderer_render (GskRenderer          *renderer,
   GskGLRenderJob *job;
   GdkSurface *surface;
   float scale_factor;
+  GLuint framebuffer_id;
 
   g_assert (GSK_IS_GL_RENDERER (renderer));
   g_assert (root != NULL);
@@ -221,7 +222,8 @@ gsk_gl_renderer_render (GskRenderer          *renderer,
   render_region = get_render_region (surface, self->context);
 
   gsk_gl_driver_begin_frame (self->driver, self->command_queue);
-  job = gsk_gl_render_job_new (self->driver, &viewport, scale_factor, render_region, 0);
+  framebuffer_id = self->context->default_framebuffer;
+  job = gsk_gl_render_job_new (self->driver, &viewport, scale_factor, render_region, framebuffer_id);
 #ifdef G_ENABLE_DEBUG
   if (GSK_RENDERER_DEBUG_CHECK (GSK_RENDERER (self), FALLBACK))
     gsk_gl_render_job_set_debug_fallback (job, TRUE);

@@ -675,9 +675,9 @@ gsk_gl_command_queue_split_draw (GskGLCommandQueue *self)
 }
 
 void
-gsk_gl_command_queue_clear (GskGLCommandQueue    *self,
-                             guint                  clear_bits,
-                             const graphene_rect_t *viewport)
+gsk_gl_command_queue_clear (GskGLCommandQueue     *self,
+                            guint                  clear_bits,
+                            const graphene_rect_t *viewport)
 {
   GskGLCommandBatch *batch;
 
@@ -750,11 +750,12 @@ static inline void
 apply_scissor (gboolean              *state,
                guint                  framebuffer,
                const graphene_rect_t *scissor,
-               gboolean               has_scissor)
+               gboolean               has_scissor,
+               guint                  default_framebuffer)
 {
   g_assert (framebuffer != (guint)-1);
 
-  if (framebuffer != 0 || !has_scissor)
+  if (framebuffer != default_framebuffer || !has_scissor)
     {
       if (*state != FALSE)
         {
@@ -953,6 +954,7 @@ gsk_gl_command_queue_execute (GskGLCommandQueue    *self,
   guint width = 0;
   guint height = 0;
   G_GNUC_UNUSED guint n_binds = 0;
+  guint default_framebuffer;
   guint n_fbos = 0;
   G_GNUC_UNUSED guint n_uniforms = 0;
   guint n_programs = 0;
@@ -971,6 +973,8 @@ gsk_gl_command_queue_execute (GskGLCommandQueue    *self,
 
   for (guint i = 0; i < G_N_ELEMENTS (textures); i++)
     textures[i] = -1;
+
+  default_framebuffer = self->context->default_framebuffer;
 
   gsk_gl_command_queue_sort_batches (self);
 
@@ -1049,7 +1053,7 @@ gsk_gl_command_queue_execute (GskGLCommandQueue    *self,
         case GSK_GL_COMMAND_KIND_CLEAR:
           if (apply_framebuffer (&framebuffer, batch->clear.framebuffer))
             {
-              apply_scissor (&scissor_state, framebuffer, &scissor_test, has_scissor);
+              apply_scissor (&scissor_state, framebuffer, &scissor_test, has_scissor, default_framebuffer);
               n_fbos++;
             }
 
@@ -1073,7 +1077,7 @@ gsk_gl_command_queue_execute (GskGLCommandQueue    *self,
 
           if (apply_framebuffer (&framebuffer, batch->draw.framebuffer))
             {
-              apply_scissor (&scissor_state, framebuffer, &scissor_test, has_scissor);
+              apply_scissor (&scissor_state, framebuffer, &scissor_test, has_scissor, default_framebuffer);
               n_fbos++;
             }
 
