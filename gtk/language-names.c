@@ -22,6 +22,7 @@
 #ifdef G_OS_WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <winnls.h>
 #else
 #ifndef ISO_CODES_PREFIX
 #define ISO_CODES_PREFIX "/usr"
@@ -42,7 +43,7 @@ get_win32_all_locales_scripts (LPWSTR locale_w, DWORD flags, LPARAM param)
   wchar_t locale_abbrev_w[9];
   gchar *langname, *locale_abbrev, *locale, *p;
   gint i;
-  const LCTYPE iso639_lctypes[] = { LOCALE_SISO639LANGNAME, LOCALE_SISO639LANGNAME2 };
+  const LCTYPE iso639_lctypes[] = { LOCALE_SISO639LANGNAME };
   GHashTable *ht_scripts_langs = (GHashTable *) param;
   PangoLanguage *lang;
 
@@ -308,7 +309,7 @@ languages_init (void)
   language_map = g_hash_table_new_full (NULL, NULL, NULL, g_free);
 
 #ifdef G_OS_WIN32
-  g_return_if_fail (EnumSystemLocalesEx (&get_win32_all_locales_scripts, LOCALE_ALL, (LPARAM) language_map, NULL));
+  g_return_if_fail (EnumSystemLocalesEx (&get_win32_all_locales_scripts, 0, (LPARAM) language_map, NULL));
 #else
   languages_variant_init ("iso_639");
   languages_variant_init ("iso_639_3");
